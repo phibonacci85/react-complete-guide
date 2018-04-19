@@ -5,8 +5,10 @@ import Cockpit from '../components/Cockpit/Cockpit';
 import Auxiliary from '../hoc/Auxiliary';
 import withClass from '../hoc/withClass';
 
+export const AuthContext = React.createContext(false);
+
 class App extends PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props);
     console.log('[App.js] Inside constructor', props);
     this.state = {
@@ -18,14 +20,15 @@ class App extends PureComponent {
       otherState: 'some other value',
       showPersons: false,
       toggleClicked: 0,
+      authenticated: false,
     };
   }
 
-  componentWillMount() {
+  componentWillMount () {
     console.log('[App.js] Inside componentWillMount');
   }
 
-  componentDidMount() {
+  componentDidMount () {
     console.log('[App.js] Inside componentDidMount');
   }
 
@@ -35,11 +38,32 @@ class App extends PureComponent {
   //     nextState.showPersons !== this.state.showPersons;
   // }
 
-  componentWillUpdate(nextProps, nextState) {
-    console.log('[UPDATE App.js] Inside componentWillUpdate', nextProps, nextState);
+  componentWillUpdate (nextProps, nextState) {
+    console.log('[UPDATE App.js] Inside componentWillUpdate', nextProps,
+      nextState);
   }
 
-  componentDidUpdate() {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    console.log(
+      '[UPDATE App.js] Inside getDerivedStateFromProps',
+      nextProps,
+      prevState,
+    );
+
+    return prevState;
+  }
+
+  getSnapshotBeforeUpdate(prevProps, prevState) {
+    console.log(
+      '[UPDATE App.js] Inside getSnapshotBeforeUpdate',
+      prevProps,
+      prevState,
+    );
+
+    return null;
+  }
+
+  componentDidUpdate () {
     console.log('[UPDATE App.js] Inside componentDidUpdate');
   }
 
@@ -65,12 +89,16 @@ class App extends PureComponent {
   };
 
   togglePersonsHandler = () => {
-    this.setState( (prevState, props) => {
+    this.setState((prevState, props) => {
       return {
         showPersons: !prevState.showPersons,
         toggleClicked: prevState.toggleClicked + 1,
-      }
+      };
     });
+  };
+
+  loginHandler = () => {
+    this.setState({authenticated: true});
   };
 
   render () {
@@ -87,13 +115,18 @@ class App extends PureComponent {
 
     return (
       <Auxiliary>
-        <button onClick={() => {this.setState({showPersons: true})}}>Show Persons</button>
+        <button onClick={() => {this.setState({showPersons: true});}}>Show
+          Persons
+        </button>
         <Cockpit
           appTitle={this.props.title}
           clicked={this.togglePersonsHandler}
           showPersons={this.state.showPersons}
-          persons={this.state.persons}/>
-        {persons}
+          persons={this.state.persons}
+          login={this.loginHandler}/>
+        <AuthContext.Provider value={this.state.authenticated}>
+          {persons}
+        </AuthContext.Provider>
       </Auxiliary>
     );
   }
